@@ -1,0 +1,50 @@
+<h2>Mis Gymkos</h2>
+
+<table>
+<% var i; if(gymkos.length) { for (i=0; i < gymkos.length; i++){ %>
+	<tr>
+	  <td><%= gymkos[i].gym_topic %></td> <td><a href="gymkos/<%= gymkos[i].id %>"> <%= gymkos[i].gym_description %></a></td>
+	  <% if (session.user.id == gymkos[i].UserId) {%>
+	  	<td><a href="gymkos/<%= gymkos[i].id %>/edit"> <button>Editar</button> </a></td>
+	  	<td>
+		  <form method="post" action="gymkos/<%= gymkos[i].id %>?_method=delete">
+		  <button type="submit" onClick="return confirm ('Borrar: <%= gymkos[i].gym_description %>')" >Borrar</button>
+		</form>
+	  	</td>
+	  <% } %>
+	</tr>
+<% }} %>
+</table>
+
+<% if (session.user) { %>
+<a href="/gymkos/new"><button type="button">Crear Gymko</button></a>
+<% } %>
+
+
+
+
+
+<% var i; if(players.length) { for (i=0; i < players.length; i++){ %>
+<h2>Gymkos en marcha</h2>
+	<table>
+	<tr>
+	  <td><%= players[i].Gymko.gym_topic %></td> <td><a href="/gymkos/<%= players[i].GymkoId %>/<%=session.user.id %>"> <%= players[i].Gymko.gym_description %></a></td>
+	</tr>
+<% }} %>
+</table>
+
+<% var i; for (i=0; i < gymkos_rand.length; i++){ %>
+<table>
+	<h2>Otros Gymkos</h2>
+	<tr>
+	  <td><%= gymkos_rand[i].gym_topic %></td> <td><a href="/gymkos/<%= gymkos_rand[i].id %>/<%=session.user.id %>"> <%= gymkos_rand[i].gym_description %></a></td>
+	</tr>
+<% } %>
+</table>
+
+<form method="get" action="/gymkos">
+	<p>Busqueda Gymko:</p>
+	<input type="text" name="search" placeHolder="palabras clave" />
+	<input type="submit" value="Enviar" />
+	<a href="/gymkos"><button type="button">Reiniciar</button></a>
+</form>

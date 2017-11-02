@@ -1,0 +1,16 @@
+
+	Gymko: <%= gymko.gym_description %> <p>
+
+<a href="/gymkos/<%= gymko.id %>/edit"> <button>Editar</button> </a>
+
+<p><strong>Kotos:</strong></p>
+<% for (index in kotos){ %>
+	<p>- <%= kotos[index].kot_description %> </p>
+<% } %>
+
+<p><a href="/gymkos/<%= gymko.id %>/notes/new"><button>Nuevo apunte</button></a></p>
+<p><strong>Comentarios:</strong></p>
+<% for (index in notes){ %>
+	<p>- <%= notes[index].not_text %> </p>
+		   <!-- <a href="/gymkos/<%= gymko.id %>/notes/<%= notes[index].id %>/publish"><button>Publicar</button></a> -->
+<% } %>

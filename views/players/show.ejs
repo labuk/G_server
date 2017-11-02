@@ -1,0 +1,32 @@
+<% if (player) { %>
+Reto aceptado
+<% } else { %>
+<form method="post" action="/gymkos/<%= gymko.id %>/<%=session.user.id %>/create">
+	<button type="submit" >Acepto el reto</button>
+</form>
+<% } %>
+
+	Gymko: <%= gymko.gym_description %> <p>
+
+<p><strong>Kotos:</strong></p>
+<% for (index in kotos){ %>
+	<p>- <%= kotos[index].kot_description %> </p>
+	<img src="/<%= kotos[index].kot_url %>" alt="Mountain View" style="width:30px;height:auto;">
+	<% if (player) { %>
+		<form method="post" enctype="multipart/form-data" action="/gymkos/<%= gymko.id %>/<%= player.id %>/photo/<%= kotos[index].id %>/create">
+			<input type="file" name="pho_photo" accept="image/*">
+			<button type="submit" >Subir foto</button>
+		</form>
+		<% var i; if(photos.length) { for (i=0; i < photos.length; i++){ if (photos[i].KotoId == kotos[index].id) { %>
+			<%= photos[i].id %>
+			<img src="/<%= photos[i].pho_url %>" alt="Mountain View" style="width:300px;height:auto;">
+		<% }}} %>
+	<% } %>
+<% } %>
+
+<p><a href="/gymkos/<%= gymko.id %>/notes/new"><button>Nuevo apunte</button></a></p>
+<p><strong>Comentarios:</strong></p>
+<% for (index in notes){ %>
+	<p>- <%= notes[index].not_text %> </p>
+		   <!-- <a href="/gymkos/<%= gymko.id %>/notes/<%= notes[index].id %>/publish"><button>Publicar</button></a> -->
+<% } %>

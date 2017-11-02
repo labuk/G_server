@@ -1,0 +1,22 @@
+Editar la descripción: <p>
+
+<form method="post" action="/gymkos/<%= gymko.id %>?_method=put ">
+	<% include _form.ejs %>
+</form>
+
+<p><strong>Kotos:</strong></p>
+<% for (index in kotos){ %>
+	<p>- <%= kotos[index].kot_description %> </p>
+	<img src="/<%= kotos[index].kot_url %>" alt="Mountain View" style="width:304px;height:200;">
+	</p>
+<% } %>
+
+
+Añadir un Koto: <p>
+
+<form method="post" enctype="multipart/form-data" action="/gymkos/<%= gymko.id %>/koto/create ">
+	<label for="preg" class="rem">Descripción:</label>
+	<input type="text" id="preg" name="kot_description" value="<%= gymko.gym_description%>" /> </p>
+	<input type="file" name="kot_photo" accept="image/*">
+	<input type="submit" value="Salvar" />
+</form>
