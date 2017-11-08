@@ -17,6 +17,7 @@ module.exports = {
         type: DataTypes.DATE
       },
       com_text:  {
+        allowNull: false,
   			type: DataTypes.STRING,
   			validate: {notEmpty: {msg: "-> Falta Descripción"}}
   	  },

@@ -27,15 +27,13 @@ exports.create = function(req,res){
 	  // Si hay un error retornamos mensajes de error de sesion
 	  if (error) {
 		req.session.errors = [{"message": 'Se ha producido un error: '+ error}];
-		res.send('Se ha producido un error: '+ error);
+		res.send({alert: '-'+ error});
 		return;
 	  }
 
 	  // Crear req.session.user y guardar campos id y username
 	  // La sesion se define por la existencia de: req.session.user
 	  req.session.user = {id:user.id, username: user.usr_name};
-
-		console.log(req.session.user);
 		res.send(req.session.user); // redireccionamos a path anterior a login
 
 	});

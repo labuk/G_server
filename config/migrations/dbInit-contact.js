@@ -17,11 +17,13 @@ module.exports = {
         type: DataTypes.DATE
       },
       con_yoId:  {
+        allowNull: false,
         type: DataTypes.STRING,
         unique: true,
         validate: {notEmpty: {msg: "-> Falta Nombre"}}
       },
       con_block: {
+        allowNull: false,
         type: DataTypes.STRING,
         validate: {notEmpty: {msg: "-> Falta Contraseña"}}
       },

@@ -44,10 +44,10 @@ app.use(methodOverride('_method'));
 // Helpers dinamicos:
 app.use(function(req, res, next){
 
-  res.header('Access-Control-Allow-Origin', 'http://192.168.1.43:3000');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
-  res.header('Access-Control-Allow-Headers', 'X-Requested-With,Content-Type,Content-Length,Origin');
-  res.header('Access-Control-Allow-Credentials', true);
+  //res.header('Access-Control-Allow-Origin', 'http://192.168.1.43:3000');
+  //res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+  //res.header('Access-Control-Allow-Headers', 'X-Requested-With,Content-Type,Content-Length,Origin');
+  //res.header('Access-Control-Allow-Credentials', true);
 
   req.session.redir = req.session.redir || "/";
 
@@ -58,11 +58,9 @@ app.use(function(req, res, next){
 
   if (!req.session.user) { // Sesion para no hacer login continuo
   //Creamos session para usuario Anonimo
-     console.log('Nuevo usuario');
      req.session.user = {online: 'true'};
      req.session.user.id = req.cookies.userId;
      req.session.user.username = req.cookies.userName;
-     console.log(req.session.user);
      req.session.autologout = Date.now();
   }
 

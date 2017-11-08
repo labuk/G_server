@@ -19,7 +19,6 @@ exports.new = function(req,res){
 
 // POST /users/create
 exports.create = function(req,res){
-
 	// hash and salt the password
 	var salt = crypto.randomBytes(128).toString('base64'),
 			key;
@@ -28,7 +27,8 @@ exports.create = function(req,res){
 		var user = models.User.build(
 			{ usr_name: req.body.usr_name,
 				usr_pass: key,
-				usr_salt: salt
+				usr_salt: salt,
+        usr_status: 1
 			});
 		user.validate().then(function(msg, err){
 			if (err) {
@@ -36,11 +36,11 @@ exports.create = function(req,res){
 			} else {
 				// guarda en DB los campos pregunta y respuesta
 				user.save().then(function(err){
-					res.send('Ok');}
+					res.send(alert: 'Ok'});}
 				).catch(function(error){
 					console.log("Catch");
 					req.session.errors = [{"message": "El nombre de usuario no está disponible"}];
-					res.send("El nombre de usuario no está disponible");
+					res.send(alert: "El nombre de usuario no está disponible"});
 				});
 			}
 		}).catch(function(error){next(error);});
@@ -55,12 +55,16 @@ exports.autenticar = function(login, password, callback){
 	.then(function(user){
 		if (user){
 			// hash and salt the password
-			crypto.pbkdf2(password, user.usr_salt, 10000, 512, 'sha512', function(err, dk) {
-				key = dk.toString('hex');
-				if (user.usr_pass === key) {
-			   callback(null, user);
-		  	} else {callback(new Error('Password erróneo.'));}
-			});
-	   } else {callback(new Error('No existe el usuario.'));}
+      if (user.usr_status == 2) {
+		   callback(new Error('Usuario bloqueado. Para cualquier reclamación escriba al correo gymkoto.app@gmail.com'));
+      } else {
+  			crypto.pbkdf2(password, user.usr_salt, 10000, 512, 'sha512', function(err, dk) {
+  				key = dk.toString('hex');
+  				if (user.usr_pass === key) {
+  			   callback(null, user);
+  		  	} else {callback(new Error('Password erróneo.'));}
+  			});
+      }
+	  } else {callback(new Error('No existe el usuario.'));}
 	})
 };

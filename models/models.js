@@ -2,12 +2,10 @@ var path = require('path');
 var fs = require('fs');
 
 //Postgres DATABASE_URL = postgres://user:passwd@host:port/database
-//SQLite
-DATABASE_URL = "sqlite://:@:/"
+//SQLite DATABASE_URL = "sqlite://:@:/"
 //MySql
 
-//var url = process.env.DATABASE_URL.match(/(.*)\:\/\/(.*?)\:(.*)@(.*)\:(.*)\/(.*)/);
-var url = DATABASE_URL.match(/(.*)\:\/\/(.*?)\:(.*)@(.*)\:(.*)\/(.*)/);
+var url = process.env.DATABASE_URL.match(/(.*)\:\/\/(.*?)\:(.*)@(.*)\:(.*)\/(.*)/);
 var DB_name  = (url[6]||null);
 var user     = (url[2]||null);
 var pwd      = (url[3]||null);
@@ -97,15 +95,6 @@ exports.Like = Like; // exportar definición de tabla Like
 exports.Comment = Comment; // exportar definición de tabla Comment
 exports.User = User; // exportar definición de tabla User
 exports.Contact = Contact; // exportar definición de tabla Contact
-
-User.count().then(function (count){
-	if (count === 0){ // la tabla se inicializa solo si está vacía
-		User.create({
-			usr_name: 'Anon',
-			usr_pass: '1234'
-		});
-	}
-});
 
 // Desplegamos todas las migraciones pendientes
 var Umzug = require('umzug');

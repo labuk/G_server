@@ -17,10 +17,12 @@ module.exports = {
         type: DataTypes.DATE
       },
       kot_description:  {
+        allowNull: false,
   			type: DataTypes.STRING,
   			validate: {notEmpty: {msg: "-> Falta Descripción"}}
   	  },
       kot_url:  {
+        allowNull: false,
         type: DataTypes.STRING,
         validate: {notEmpty: {msg: "-> Falta Descripción"}}
       },

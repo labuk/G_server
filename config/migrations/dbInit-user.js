@@ -26,16 +26,19 @@ module.exports = {
         validate: {notEmpty: {msg: "-> Falta Contraseña"}}
       },
       usr_avatar: {
-        type: DataTypes.STRING,
-        validate: {notEmpty: {msg: "-> Falta Avatar"}}
+        type: DataTypes.STRING
       },
       usr_online:  {
         type: DataTypes.BOOLEAN
       },
+      usr_status:  {
+        type: DataTypes.INTEGER
+      },
       usr_salt: {
         type: DataTypes.STRING,
         allowNull: false,
-        defaultValue: 0
+        defaultValue: 0,
+        validate: {notEmpty: {msg: "-> Falta Salt"}}
       }
     });
   },

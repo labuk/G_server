@@ -17,10 +17,12 @@ module.exports = {
         type: DataTypes.DATE
       },
       gym_description:  {
+        allowNull: false,
   			type: DataTypes.STRING,
   			validate: {notEmpty: {msg: "-> Falta Descripción"}}
   	  },
   		gym_topic: {
+        allowNull: false,
   			type: DataTypes.STRING,
   			validate: {notEmpty: {msg: "-> Falta Temática"}}
   		},

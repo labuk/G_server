@@ -41,7 +41,7 @@ exports.show_gymko = function(req, res){
 						where: { PlayerId: player.id }
 					}).then(function(photos){
 						//console.log(player);
-						res.send({  gymko: req.gymko, kotos: kotos, player: player, photos: photos, notes: notes, errors: [] });
+						res.send({ gymko: req.gymko, kotos: kotos, player: player, photos: photos, notes: notes, errors: [] });
 					});
 				} else {
 						res.send({ gymko: req.gymko, kotos: kotos, player: player, notes: notes, errors: [] });
@@ -61,13 +61,11 @@ exports.create_player = function(req,res){
 		} else {
 			// guarda en DB los campos pregunta y respuesta
 			player.save({fields: ["GymkoId","UserId"]}).then(function(){
-        console.log('done');
         models.Gymko.find({
             where: { id:req.params.gymkoId }
         }).then(function(gymko){
           gymko.gym_follow = gymko.gym_follow + 1;
           gymko.save({fields: ["gym_follow"]}).then(function(){
-            console.log('done2');
             res.send({alert: 'Ok'});
           });
         });
