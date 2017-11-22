@@ -113,7 +113,7 @@ exports.new = function(req,res){
 };
 
 // POST /gymkos/:gymkoId/comments
-exports.create = function(req,res){
+exports.create = function(req, res, next){
  	var comment = models.Comment.build(
 		{ com_text: req.body.comment.texto,
 		  GymkoId: req.params.gymkoId,
@@ -132,7 +132,7 @@ exports.create = function(req,res){
 };
 
 // GET /gymkos/:gymkoId/comments/:commentId/publish
-exports.publish = function(req,res){
+exports.publish = function(req, res, next){
 	req.comment.publicado = true;
 
 	req.comment.save({ fields: ["publicado"]}).then(

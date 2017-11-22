@@ -59,8 +59,16 @@ app.use(function(req, res, next){
   if (!req.session.user) { // Sesion para no hacer login continuo
   //Creamos session para usuario Anonimo
      req.session.user = {online: 'true'};
-     req.session.user.id = req.cookies.userId;
-     req.session.user.username = req.cookies.userName;
+     if(req.body){
+       if (req.body.userId){
+       req.session.user.id = req.body.userId;
+       }
+     }
+     if(req.query){
+       if (req.query.userId){
+         req.session.user.id = req.query.userId;
+       }
+     }
      req.session.autologout = Date.now();
   }
 

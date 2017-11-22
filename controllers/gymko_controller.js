@@ -37,7 +37,7 @@ exports.load_NoteId = function(req, res, next, noteId){
 
 
 // GET /gymkos
-exports.index_gymko = function(req, res){
+exports.index_gymko = function(req, res, next){
 	if(req.query.search) {
 		var search_string = req.query.search.replace(/ |\u0195|\xc3/g,'%');
 		var search_string = '%'+search_string+'%';
@@ -51,17 +51,24 @@ exports.index_gymko = function(req, res){
       order: 'updatedAt DESC',
       limit: 100
 	}).then(function(gymkos){
-    console.log(req.session.user);
 		models.Player.findAll({
 				where: { UserId: req.session.user.id },
 				include: [{model: models.Gymko, attributes: ['gym_description','gym_topic','gym_follow','updatedAt']}]
 		}).then(function(players){
-			models.Gymko.findAll({
-					where: { UserId: req.session.user.id },
-          order: 'updatedAt DESC'
-			}).then(function(gymkos_rand) {
-				res.send({ gymkos: gymkos, players: players, gymkos_rand: gymkos_rand, errors: []});
-	})})}).catch(function(error){next(error);})	}
+				res.send({ gymkos: gymkos, players: players, errors: []});
+	})}).catch(function(error){next(error);})	}
+};
+
+
+
+// GET /my_gymkos
+exports.index_mygymkos = function(req, res, next){
+	models.Gymko.findAll({
+    where: { UserId: req.session.user.id },
+    order: 'updatedAt DESC'
+	}).then(function(gymkos){
+		res.send({ gymkos: gymkos, errors: []});
+	}).catch(function(error){next(error);})
 };
 
 // GET /gymkos/:gymkoid
@@ -93,15 +100,17 @@ exports.statistics = function(req,res){
 	// Se utiliza Promise.all para realizar consultas asíncronas en paralelo
 	var stats = {};
 	sequelize.Promise.all([
-  	   models.Gymko.count(),
+  	 models.Gymko.count(),
 	   models.Note.count(),
 	   models.Gymko.findAll({ include: [{model: models.Note, required: true}] }),
+     models.User.count(),
+     models.User.count({ where: { updatedAt: {$gt: new Date(new Date() - 7 * 24 * 60 * 60 * 1000)} } })
 	]).then(function(result){
 		stats.gymko = result[0];
 		stats.note = result[1];
-		stats.note_gymko = result[1]/result[0];
 		stats.withNote = result[2].length;
-		stats.woutNote = result[0] - result[2].length;
+    stats.user = result[3];
+    stats.user_active = result[4];
 		res.render('gymkos/statistics',{ statictics: stats, errors: []});
 
 	});
@@ -159,10 +168,10 @@ exports.update_gymko = function(req,res){
 };
 
 // DELETE /gymkos/:gymkoId
-exports.destroy_gymko = function(req,res){
+exports.destroy_gymko = function(req, res, next){
 	console.log('1');
  	req.gymko.destroy().then( function() {
-		res.redirect('/gymkos');
+		res.send({alert: 'Ok'});
 	}).catch(function(error){next(error)});
 };
 
@@ -208,7 +217,7 @@ exports.new_note = function(req,res){
 };
 
 // POST /gymkos/:gymkoId/notes
-exports.create_note = function(req,res){
+exports.create_note = function(req, res, next){
  	var note = models.Note.build(
 		{ not_text: req.body.not_text,
 		  GymkoId: req.params.gymkoId,

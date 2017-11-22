@@ -18,7 +18,7 @@ module.exports = {
       },
       not_text:  {
         allowNull: false,
-  			type: DataTypes.STRING,
+  			type: DataTypes.TEXT,
   			validate: {notEmpty: {msg: "-> Falta comentario"}}
   	  },
       GymkoId: {

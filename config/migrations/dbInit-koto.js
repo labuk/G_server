@@ -18,7 +18,7 @@ module.exports = {
       },
       kot_description:  {
         allowNull: false,
-  			type: DataTypes.STRING,
+  			type: DataTypes.TEXT,
   			validate: {notEmpty: {msg: "-> Falta Descripción"}}
   	  },
       kot_url:  {

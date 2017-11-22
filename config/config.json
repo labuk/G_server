@@ -11,10 +11,12 @@
     "dialect": "mysql"
   },
   "production": {
-    "username": "gymkoto-184816",
+    "username": "root",
     "password": "Khe58KdK68yO9jjn",
     "database": "gymkoto1",
-    "host": "35.195.80.12",
+        "dialectOptions": {
+              "socketPath": "/cloudsql/gymkoto-184816:europe-west1:gymkoto1"
+        },
     "dialect": "mysql"
   }
 }

@@ -8,7 +8,7 @@ module.exports = function(sequelize, DataTypes){
 			validate: {notEmpty: {msg: "-> Falta Nombre"}}
 		  },
 		  usr_pass: {
-			type: DataTypes.STRING,
+			type: DataTypes.STRING(1030),
 			validate: {notEmpty: {msg: "-> Falta Contraseña"}}
 			},
 			usr_avatar: {

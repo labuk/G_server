@@ -17,6 +17,7 @@ router.param('noteId', gymkoController.load_NoteId); //Si existe parametro noteI
 
 // Definicion de rutas /gymkos
 router.get('/gymkos', gymkoController.index_gymko);
+router.get('/my_gymkos', gymkoController.index_mygymkos);
 router.get('/gymkos/:gymkoId(\\d+)', gymkoController.show_gymko);
 router.get('/gymkos/:gymkoId(\\d+)/answer', gymkoController.answer);
 router.get('/gymkos/new', sessionController.loginRequired, gymkoController.new_gymko); //new gymko

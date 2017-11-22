@@ -18,7 +18,7 @@ exports.new = function(req,res){
 };
 
 // POST /users/create
-exports.create = function(req,res){
+exports.create = function(req, res, next){
 	// hash and salt the password
 	var salt = crypto.randomBytes(128).toString('base64'),
 			key;
@@ -36,11 +36,14 @@ exports.create = function(req,res){
 			} else {
 				// guarda en DB los campos pregunta y respuesta
 				user.save().then(function(err){
-					res.send(alert: 'Ok'});}
-				).catch(function(error){
+          var alert = "Ok";
+					res.send({alert: alert});
+        }).catch(function(error){
+          console.log(error);
 					console.log("Catch");
 					req.session.errors = [{"message": "El nombre de usuario no está disponible"}];
-					res.send(alert: "El nombre de usuario no está disponible"});
+          var alert = "El nombre de usuario no está disponible";
+					res.send({alert: alert});
 				});
 			}
 		}).catch(function(error){next(error);});

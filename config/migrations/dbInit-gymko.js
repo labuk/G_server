@@ -18,7 +18,7 @@ module.exports = {
       },
       gym_description:  {
         allowNull: false,
-  			type: DataTypes.STRING,
+  			type: DataTypes.TEXT,
   			validate: {notEmpty: {msg: "-> Falta Descripción"}}
   	  },
   		gym_topic: {

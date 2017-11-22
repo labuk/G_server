@@ -3,7 +3,7 @@
 module.exports = function(sequelize, DataTypes){
 	return sequelize.define('Gymko',
 		{ gym_description:  {
-			type: DataTypes.STRING,
+			type: DataTypes.TEXT,
 			validate: {notEmpty: {msg: "-> Falta Descripción"}}
 		  },
 		  gym_topic: {
