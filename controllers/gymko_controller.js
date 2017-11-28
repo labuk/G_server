@@ -104,13 +104,15 @@ exports.statistics = function(req,res){
 	   models.Note.count(),
 	   models.Gymko.findAll({ include: [{model: models.Note, required: true}] }),
      models.User.count(),
-     models.User.count({ where: { updatedAt: {$gt: new Date(new Date() - 7 * 24 * 60 * 60 * 1000)} } })
+     models.User.count({ where: { updatedAt: {$gt: new Date(new Date() - 7 * 24 * 60 * 60 * 1000)} } }),
+     models.Player.count()
 	]).then(function(result){
 		stats.gymko = result[0];
 		stats.note = result[1];
 		stats.withNote = result[2].length;
     stats.user = result[3];
     stats.user_active = result[4];
+    stats.player = result[5];
 		res.render('gymkos/statistics',{ statictics: stats, errors: []});
 
 	});
@@ -230,15 +232,60 @@ exports.create_note = function(req, res, next){
 		} else {
 			// guarda en DB los campos pregunta y respuesta
       note.save().then(noteSave => {
-        models.Gymko.update({
-          updatedAt: Date.now(),
-        }, {
-          where: { id: req.params.gymkoId }
+        models.Player.find({
+          where: {
+            GymkoId:req.params.gymkoId,
+            UserId: req.session.user.id
+          }
+        }).then(function(player){
+          if(player){
+            models.Gymko.find({
+                where: { id:req.params.gymkoId }
+            }).then(function(gymko){
+              models.Gymko.update({
+                updatedAt: Date.now()
+              }, {
+                where: { id: req.params.gymkoId }
+              }).then(function(){
+                res.send(noteSave);
+              });
+            });
+          } else {
+            var player = models.Player.build(
+              { GymkoId: req.params.gymkoId,
+                UserId: req.session.user.id
+              });
+            player.save({fields: ["GymkoId","UserId"]}).then(function(){
+              models.Gymko.find({
+                  where: { id:req.params.gymkoId }
+              }).then(function(gymko){
+                models.Gymko.update({
+                  gym_follow: gymko.gym_follow + 1
+                }, {
+                  where: { id: req.params.gymkoId }
+                }).then(function(){
+                  res.send(noteSave);
+                });
+              });
+            });
+          }
         });
-        res.send(noteSave);
       })
 		}
 	}).catch(function(error){next(error)});
+};
+
+// DELETE /gymkos/:gymkoId/notes/:noteId
+exports.destroy_note = function(req, res, next){
+  models.Note.find({
+      where: {
+        id: req.params.noteId
+      }
+  }).then(function(note){
+    note.destroy().then( function() {
+      res.send({alert: 'Ok'});
+    }).catch(function(error){next(error)});
+  });
 };
 
 /*

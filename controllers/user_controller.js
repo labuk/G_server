@@ -17,6 +17,15 @@ exports.new = function(req,res){
 	res.render('users/new', {errors: errors});
 };
 
+// PUT /users/update
+exports.put = function(req,res){
+  models.User.update(
+    {usr_online: 1},
+    { where: { id: req.session.user.id } }
+  );
+	res.send({alert: "Ok"});
+};
+
 // POST /users/create
 exports.create = function(req, res, next){
 	// hash and salt the password
@@ -43,6 +52,7 @@ exports.create = function(req, res, next){
 					console.log("Catch");
 					req.session.errors = [{"message": "El nombre de usuario no está disponible"}];
           var alert = "El nombre de usuario no está disponible";
+
 					res.send({alert: alert});
 				});
 			}
@@ -64,7 +74,17 @@ exports.autenticar = function(login, password, callback){
   			crypto.pbkdf2(password, user.usr_salt, 10000, 512, 'sha512', function(err, dk) {
   				key = dk.toString('hex');
   				if (user.usr_pass === key) {
-  			   callback(null, user);
+
+            models.User.update(
+              {usr_online: 1},
+              { where: { id: user.id } }
+            );
+
+            console.log('Fecha');
+            console.log(user.id)
+            console.log(user.createdAt);
+            console.log(user.updatedAt);
+  			    callback(null, user);
   		  	} else {callback(new Error('Password erróneo.'));}
   			});
       }

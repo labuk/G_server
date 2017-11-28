@@ -17,8 +17,8 @@ module.exports = {
         type: DataTypes.DATE
       },
       com_text:  {
-        allowNull: TEXT,
-  			type: DataTypes.STRING,
+        allowNull: false,
+  			type: DataTypes.TEXT,
   			validate: {notEmpty: {msg: "-> Falta Descripción"}}
   	  },
       PhotoId: {

@@ -44,42 +44,42 @@ if (process.env.NODE_ENV === 'production') {
 
 
 // Importar la definición de la tabla User en user.js
-var user_path = path.join(__dirname, 'user/user')
+var user_path = path.join(__dirname, 'user/user');
 var User = sequelize.import(user_path);
 
 // Importar la definición de la tabla Contact en contact.js
-var contact_path = path.join(__dirname, 'user/contact')
+var contact_path = path.join(__dirname, 'user/contact');
 var Contact = sequelize.import(contact_path);
 	Contact.belongsTo(User);
 
 // Importar la definición de la tabla Gymko en gymko.js
-var gymko_path = path.join(__dirname, 'gymko/gymko')
+var gymko_path = path.join(__dirname, 'gymko/gymko');
 var Gymko = sequelize.import(gymko_path);
 	Gymko.belongsTo(User);
 
 // Importar la definición de la tabla Koto en koto.js
-var koto_path = path.join(__dirname, 'gymko/koto')
+var koto_path = path.join(__dirname, 'gymko/koto');
 var Koto = sequelize.import(koto_path);
 	Koto.belongsTo(Gymko);
 	Gymko.hasMany(Koto, {onDelete: 'cascade', hooks:true});
 	Koto.belongsTo(User);
 
 // Importar la definición de la tabla Note en note.js
-var note_path = path.join(__dirname, 'gymko/note')
+var note_path = path.join(__dirname, 'gymko/note');
 var Note = sequelize.import(note_path);
 	Note.belongsTo(Gymko);
 	Gymko.hasMany(Note, {onDelete: 'cascade', hooks:true});
 	Note.belongsTo(User);
 
 // Importar la definición de la tabla Player en player.js
-var player_path = path.join(__dirname, 'player/player')
+var player_path = path.join(__dirname, 'player/player');
 var Player = sequelize.import(player_path);
 	Player.belongsTo(Gymko);
 	Gymko.hasMany(Player, {onDelete: 'cascade', hooks:true});
 	Player.belongsTo(User);
 
 // Importar la definición de la tabla Photo en photo.js
-var photo_path = path.join(__dirname, 'player/photo')
+var photo_path = path.join(__dirname, 'player/photo');
 var Photo = sequelize.import(photo_path);
 	Photo.belongsTo(Player);
 	Player.hasMany(Photo, {onDelete: 'cascade', hooks:true});
@@ -88,14 +88,14 @@ var Photo = sequelize.import(photo_path);
 	Photo.belongsTo(User);
 
 // Importar la definición de la tabla Like en like.js
-var like_path = path.join(__dirname, 'player/like')
+var like_path = path.join(__dirname, 'player/like');
 var Like = sequelize.import(like_path);
 	Like.belongsTo(Photo);
 	Photo.hasMany(Like, {onDelete: 'cascade', hooks:true});
 	Like.belongsTo(User);
 
 // Importar la definición de la tabla Comment en comment.js
-var comment_path = path.join(__dirname, 'gymko/comment')
+var comment_path = path.join(__dirname, 'gymko/comment');
 var Comment = sequelize.import(comment_path);
 	Comment.belongsTo(Photo);
 	Photo.hasMany(Comment, {onDelete: 'cascade', hooks:true});

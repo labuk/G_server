@@ -29,12 +29,14 @@ router.get('/gymkos/statistics', gymkoController.statistics);
 router.post('/gymkos/:gymkoId(\\d+)/koto/create', sessionController.loginRequired, gymkoController.create_koto); //post gymko
 router.get('/gymkos/:gymkoId(\\d+)/notes/new', gymkoController.new_note); //new note
 router.post('/gymkos/:gymkoId(\\d+)/notes', gymkoController.create_note); //post note
+router.delete('/gymkos/:gymkoId(\\d+)/notes/:noteId(\\d)', gymkoController.destroy_note); //delete note
 //router.get('/gymkos/:gymkoId(\\d+)/notes/:noteId(\\d+)/publish', sessionController.loginRequired, gymkoController.publish_note);
 
 
 // Definicion de rutas /player
 router.get('/gymkos/:gymkoId(\\d+)/:userId(\\d+)', playerController.show_gymko);
 router.post('/gymkos/:gymkoId(\\d+)/:userId(\\d+)/create', playerController.create_player);
+router.delete('/gymkos/:gymkoId(\\d+)/:userId(\\d+)/delete', playerController.destroy_player);
 router.post('/gymkos/:gymkoId(\\d+)/:playerId(\\d+)/photo/:kotoId(\\d+)/create', playerController.create_photo);
 //router.get('/gymkos/:gymkoId(\\d+)/:playerId(\\d+)/:photoId(\\d+)/comments/new', playerController.new_comment);
 //router.post('/gymkos/:gymkoId(\\d+)/:playerId(\\d+)/:photoId(\\d+)/comments', playerController.create_comment);
@@ -48,6 +50,7 @@ router.get('/logout', sessionController.destroy); // destruir session - lo ideal
 
 // Definicion de rutas de user
 router.get('/users/new', userController.new); // formulario nuevo usuario
+router.put('/users/update', userController.put); // formulario nuevo usuario
 router.post('/users/create', userController.create); // crear nuevo usuario
 
 // GET author page

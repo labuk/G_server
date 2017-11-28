@@ -73,6 +73,26 @@ exports.create_player = function(req,res){
 	});
 };
 
+// DELETE /gymkos/:gymkoid/:userId/delete
+exports.destroy_player = function(req, res, next){
+  models.Player.find({
+      where: {
+        gymkoId: req.params.gymkoId,
+        userId: req.session.user.id }
+  }).then(function(player){
+   	player.destroy().then( function() {
+      models.Gymko.find({
+          where: { id:req.params.gymkoId }
+      }).then(function(gymko){
+        gymko.gym_follow = gymko.gym_follow - 1;
+        gymko.save({fields: ["gym_follow"],  silent: true }).then(function(){
+          res.send({alert: 'Ok'});
+        });
+      });
+  	}).catch(function(error){next(error)});
+  });
+};
+
 // POST /gymkos/:gymkoid/:playerId/photo/:playerId/:kotoId/create
 exports.create_photo = function(req,res){
   var photo =  models.Photo.build();
