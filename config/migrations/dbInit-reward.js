@@ -1,7 +1,7 @@
 'use strict';
 module.exports = {
   up: function(queryInterface, DataTypes) {
-    return queryInterface.createTable('Photos', {
+    return queryInterface.createTable('Rewards', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -16,32 +16,20 @@ module.exports = {
         allowNull: false,
         type: DataTypes.DATE
       },
-      pho_likes:  {
+      rew_points:  {
   			type: DataTypes.INTEGER
   	  },
-      pho_url:  {
-        type: DataTypes.STRING,
-        validate: {notEmpty: {msg: "-> Falta Descripción"}}
-      },
-      PlayerId: {
-        allowNull: false,
-        type: DataTypes.INTEGER
-      },
-      KotoId: {
+      GymkoId: {
         allowNull: false,
         type: DataTypes.INTEGER
       },
       UserId: {
         allowNull: false,
         type: DataTypes.INTEGER
-      },
-      GymkoId: {
-        allowNull: false,
-  			type: DataTypes.INTEGER
-    	}
+      }
     });
   },
   down: function(queryInterface, DataTypes) {
-    return queryInterface.dropTable('Photos');
+    return queryInterface.dropTable('Rewards');
   }
 };

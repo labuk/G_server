@@ -60,11 +60,15 @@ app.use(function(req, res, next){
   //Creamos session para usuario Anonimo
      req.session.user = {online: 'true'};
      if(req.body){
+       console.log('Post');
+       console.log(req.body);
        if (req.body.userId){
        req.session.user.id = req.body.userId;
        }
      }
      if(req.query){
+       console.log('Query');
+       console.log(req.query)
        if (req.query.userId){
          req.session.user.id = req.query.userId;
        }

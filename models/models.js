@@ -78,13 +78,28 @@ var Player = sequelize.import(player_path);
 	Gymko.hasMany(Player, {onDelete: 'cascade', hooks:true});
 	Player.belongsTo(User);
 
+	// Importar la definición de la tabla Prize en prize.js
+	var prize_path = path.join(__dirname, 'player/prize');
+	var Prize = sequelize.import(prize_path);
+		Prize.belongsTo(User);
+			User.hasMany(Prize, {onDelete: 'cascade', hooks:true});
+
+// Importar la definición de la tabla Reward en reward.js
+var reward_path = path.join(__dirname, 'player/reward');
+var Reward = sequelize.import(reward_path);
+	Reward.belongsTo(Gymko);
+	Reward.belongsTo(User);
+		User.hasMany(Reward, {onDelete: 'cascade', hooks:true});
+
 // Importar la definición de la tabla Photo en photo.js
 var photo_path = path.join(__dirname, 'player/photo');
 var Photo = sequelize.import(photo_path);
-	Photo.belongsTo(Player);
-	Player.hasMany(Photo, {onDelete: 'cascade', hooks:true});
+	Photo.belongsTo(Gymko);
+		Gymko.hasMany(Photo, {onDelete: 'cascade', hooks:true});
 	Photo.belongsTo(Koto);
-	Koto.hasMany(Photo, {onDelete: 'cascade', hooks:true});
+		Koto.hasMany(Photo);
+	Photo.belongsTo(Player);
+		Player.hasMany(Photo);
 	Photo.belongsTo(User);
 
 // Importar la definición de la tabla Like en like.js
@@ -105,6 +120,8 @@ exports.Gymko = Gymko; // exportar definición de tabla Gymko
 exports.Koto = Koto; // exportar definición de tabla Gymko
 exports.Note = Note; // exportar definición de tabla Note
 exports.Player = Player; // exportar definición de tabla Player
+exports.Prize = Prize; // exportar definición de tabla Prize
+exports.Reward = Reward; // exportar definición de tabla Reward
 exports.Photo = Photo; // exportar definición de tabla Photo
 exports.Like = Like; // exportar definición de tabla Like
 exports.Comment = Comment; // exportar definición de tabla Comment

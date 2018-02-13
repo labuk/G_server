@@ -17,13 +17,30 @@ exports.new = function(req,res){
 	res.render('users/new', {errors: errors});
 };
 
+// GET /my_profile
+exports.index_myprofile = function(req,res){
+  models.User.find({
+    where: { id: req.session.user.id }
+  }).then(function(profile){
+		res.send({ profile: profile });
+	}).catch(function(error){
+		next(error);
+	})
+};
+
 // PUT /users/update
 exports.put = function(req,res){
   models.User.update(
     {usr_online: 1},
     { where: { id: req.session.user.id } }
-  );
-	res.send({alert: "Ok"});
+  ).then(function(){
+    models.User.find({
+      where: { id: req.session.user.id }
+    }).then(function(profile){
+      res.send({ profile: profile });
+    })
+  });
+
 };
 
 // POST /users/create
@@ -37,6 +54,7 @@ exports.create = function(req, res, next){
 			{ usr_name: req.body.usr_name,
 				usr_pass: key,
 				usr_salt: salt,
+        usr_points: 0,
         usr_status: 1
 			});
 		user.validate().then(function(msg, err){

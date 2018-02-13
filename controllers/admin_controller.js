@@ -204,7 +204,7 @@ exports.index_myrewards = function(req, res, next){
 	models.Reward.findAll({
     where: { UserId: req.session.user.id },
     order: 'Reward.updatedAt DESC',
-		include: [{model: models.Gymko, attributes: ['gym_description','gym_topic','id','createdAt']}]
+		include: [{model: models.Gymko, attributes: ['gym_description','gym_topic']}]
 	}).then(function(rewards){
 		res.send({ rewards: rewards });
 	}).catch(function(error){
@@ -222,7 +222,7 @@ exports.index_prizes = function(req, res, next){
 			rew_points: {$lt: 0}
 		},
     order: 'Reward.updatedAt DESC',
-		include: [{model: models.Gymko, attributes: ['gym_description','gym_topic','gym_url','gym_follow','id','updatedAt','createdAt']}]
+		include: [{model: models.Gymko, attributes: ['gym_description','gym_topic','gym_url','gym_follow','updatedAt']}]
 	}).then(function(rewards){
 		res.send({ rewards: rewards });
 	}).catch(function(error){
@@ -234,53 +234,46 @@ exports.index_prizes = function(req, res, next){
 // POST /gymkos/reward/:gymkoid/:userId/create
 exports.create_reward = function(req,res){
 	console.log('Reward');
-	models.User.find({
-			where: { id: req.params.userId }
-	}).then(function(user){
-		user.usr_points = parseInt(user.usr_points) + parseInt(req.body.rew_points);
-		if(user.usr_points < 0){
-			res.send({points: 1});
+	models.Reward.find({
+		where: {
+			gymkoId: req.params.gymkoId,
+			userId: req.params.userId }
+	}).then(function(reward){
+		if(reward) {
+			console.log('Reward concedida');
+			res.send({points: 0});
 		} else {
-			models.Reward.find({
+			var points = req.body.rew_points;
+			models.Gymko.find({
 				where: {
-					gymkoId: req.params.gymkoId,
-					userId: req.params.userId }
-			}).then(function(reward){
-				if(reward) {
-					console.log('Reward concedida');
-					res.send({points: 0});
-				} else {
-					var points = req.body.rew_points;
-					models.Gymko.find({
-						where: {
-							id: req.params.gymkoId
-						}
-					}).then(function(gymko){
-						var reward = models.Reward.build(
-							{ rew_points: points,
-								GymkoId: req.params.gymkoId,
-								UserId: req.params.userId
-							});
-						reward.validate().then(function(err){
-							if (err) {
-								console.log(err);
-								res.render('gymkos/new', {gymko: gymko, errors: err.errors});
-							} else {
-								// guarda en DB los campos pregunta y respuesta
-								reward.save().then(function(){
-									//console.log('User');
-									//models.User.find({
-									//		where: { id: req.params.userId }
-									//}).then(function(user){
-										user.usr_points = parseInt(user.usr_points) + parseInt(points);
-										user.save({fields: ["usr_points"]}).then(function(){
-											res.send({points: points});
-										});
-									//});
-							});}
-						});
-					});
+					id: req.params.gymkoId
 				}
+			}).then(function(gymko){
+				console.log(gymko);
+				var reward = models.Reward.build(
+					{ rew_points: gymko.gym_point,
+						GymkoId: req.params.gymkoId,
+						UserId: req.params.userId
+					});
+				reward.validate().then(function(err){
+					if (err) {
+						console.log(err);
+						res.render('gymkos/new', {gymko: gymko, errors: err.errors});
+					} else {
+						// guarda en DB los campos pregunta y respuesta
+						reward.save().then(function(){
+							console.log('User');
+							models.User.find({
+									where: { id: req.params.userId }
+							}).then(function(user){
+								user.usr_points = parseInt(user.usr_points) + parseInt(gymko.gym_point);
+								console.log(user.usr_points);
+								user.save({fields: ["usr_points"]}).then(function(){
+									res.send({points: points});
+								});
+							});
+					});}
+				});
 			});
 		}
 	});

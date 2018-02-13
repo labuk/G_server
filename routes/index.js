@@ -22,6 +22,7 @@ router.get('/gymkos/:gymkoId(\\d+)', gymkoController.show_gymko);
 router.get('/gymkos/:gymkoId(\\d+)/answer', gymkoController.answer);
 router.get('/gymkos/new', sessionController.loginRequired, gymkoController.new_gymko); //new gymko
 router.post('/gymkos/create', sessionController.loginRequired, gymkoController.create_gymko); //post gymko
+router.post('/gymkos/image', sessionController.loginRequired, gymkoController.image_gymko); //post image to gymko
 router.get('/gymkos/:gymkoId(\\d+)/edit', sessionController.loginRequired, gymkoController.edit_gymko); //edit gymko
 router.put('/gymkos/:gymkoId(\\d+)', sessionController.loginRequired, gymkoController.update_gymko); //put gymko
 router.delete('/gymkos/:gymkoId(\\d+)', sessionController.loginRequired, gymkoController.destroy_gymko); //delete gymko
@@ -29,7 +30,7 @@ router.get('/gymkos/statistics', gymkoController.statistics);
 router.post('/gymkos/:gymkoId(\\d+)/koto/create', sessionController.loginRequired, gymkoController.create_koto); //post gymko
 router.get('/gymkos/:gymkoId(\\d+)/notes/new', gymkoController.new_note); //new note
 router.post('/gymkos/:gymkoId(\\d+)/notes', gymkoController.create_note); //post note
-router.delete('/gymkos/:gymkoId(\\d+)/notes/:noteId(\\d)', gymkoController.destroy_note); //delete note
+router.delete('/gymkos/:gymkoId(\\d+)/notes/:noteId(\\d+)', gymkoController.destroy_note); //delete note
 //router.get('/gymkos/:gymkoId(\\d+)/notes/:noteId(\\d+)/publish', sessionController.loginRequired, gymkoController.publish_note);
 
 
@@ -37,7 +38,12 @@ router.delete('/gymkos/:gymkoId(\\d+)/notes/:noteId(\\d)', gymkoController.destr
 router.get('/gymkos/:gymkoId(\\d+)/:userId(\\d+)', playerController.show_gymko);
 router.post('/gymkos/:gymkoId(\\d+)/:userId(\\d+)/create', playerController.create_player);
 router.delete('/gymkos/:gymkoId(\\d+)/:userId(\\d+)/delete', playerController.destroy_player);
-router.post('/gymkos/:gymkoId(\\d+)/:playerId(\\d+)/photo/:kotoId(\\d+)/create', playerController.create_photo);
+router.post('/gymkos/:gymkoId(\\d+)/photo/:kotoId(\\d+)/create/:userId(\\d+)', playerController.create_photo);
+router.delete('/gymkos/:gymkoId(\\d+)/photo/:photoId(\\d+)', playerController.destroy_photo); //delete photo
+router.get('/my_rewards', playerController.index_myrewards);
+router.post('/gymkos/reward/:gymkoId(\\d+)/:userId(\\d+)/create', playerController.create_reward);
+router.get('/prizes', playerController.index_prizes);
+router.post('/gymkos/prize/create', playerController.create_prize);
 //router.get('/gymkos/:gymkoId(\\d+)/:playerId(\\d+)/:photoId(\\d+)/comments/new', playerController.new_comment);
 //router.post('/gymkos/:gymkoId(\\d+)/:playerId(\\d+)/:photoId(\\d+)/comments', playerController.create_comment);
 //router.get('/gymkos/:gymkoId(\\d+)/:playerId(\\d+)/:photoId(\\d+)/comments/:commentId(\\d+)/publish', sessionController.loginRequired, playerController.publish_comment);
@@ -49,6 +55,7 @@ router.post('/login', sessionController.create); // crear session
 router.get('/logout', sessionController.destroy); // destruir session - lo ideal sería utilizar delete
 
 // Definicion de rutas de user
+router.get('/my_profile', userController.index_myprofile);
 router.get('/users/new', userController.new); // formulario nuevo usuario
 router.put('/users/update', userController.put); // formulario nuevo usuario
 router.post('/users/create', userController.create); // crear nuevo usuario

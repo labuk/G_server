@@ -1,7 +1,7 @@
 'use strict';
 module.exports = {
   up: function(queryInterface, DataTypes) {
-    return queryInterface.createTable('Gymkos', {
+    return queryInterface.createTable('Prizes', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -16,29 +16,22 @@ module.exports = {
         allowNull: false,
         type: DataTypes.DATE
       },
-      gym_description:  {
+      pri_description:  {
         allowNull: false,
-  			type: DataTypes.TEXT,
-  			validate: {notEmpty: {msg: "-> Falta Descripción"}}
+        type: DataTypes.TEXT
+      },
+      pri_type: {
+        allowNull: false,
+        type: DataTypes.STRING
+      },
+      pri_follow: {
+        type: DataTypes.INTEGER
+      },
+      pri_points:  {
+        allowNull: false,
+  			type: DataTypes.INTEGER
   	  },
-      gym_type: {
-        allowNull: true,
-        type: DataTypes.STRING,
-        validate: {notEmpty: {msg: "-> Falta Temática"}}
-      },
-  		gym_topic: {
-        allowNull: false,
-  			type: DataTypes.STRING,
-  			validate: {notEmpty: {msg: "-> Falta Temática"}}
-  		},
-      gym_follow: {
-        type: DataTypes.INTEGER
-      },
-      gym_point:  {
-        allowNull: true,
-        type: DataTypes.INTEGER
-      },
-      gym_url:{
+      pri_url:{
         allowNull: true,
         type: DataTypes.TEXT
       },
@@ -49,6 +42,6 @@ module.exports = {
     });
   },
   down: function(queryInterface, DataTypes) {
-    return queryInterface.dropTable('Gymkos');
+    return queryInterface.dropTable('Prizes');
   }
 };

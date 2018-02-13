@@ -34,6 +34,9 @@ module.exports = {
       usr_status:  {
         type: DataTypes.INTEGER
       },
+      usr_points:  {
+        type: DataTypes.INTEGER
+      },
       usr_salt: {
         type: DataTypes.STRING,
         allowNull: false,

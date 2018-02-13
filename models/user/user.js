@@ -17,6 +17,9 @@ module.exports = function(sequelize, DataTypes){
 			usr_status: {
 			type: DataTypes.INTEGER
 			},
+			usr_points: {
+				type: DataTypes.INTEGER
+			},
       usr_online:  {
   		type: DataTypes.BOOLEAN
       },

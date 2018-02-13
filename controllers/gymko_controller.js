@@ -5,10 +5,6 @@ var models = require('../models/models.js');
 var sequelize = require('sequelize');
 
 var formidable = require('formidable');
-var form = new formidable.IncomingForm({
-  uploadDir: './public/images/kotos',
-  multiples: true // req.files to be arrays of files
-});
 var fs = require('fs-extra');
 
 // Autoload - Factoriza el código si la ruta incluye :gymkoId
@@ -49,17 +45,24 @@ exports.index_gymko = function(req, res, next){
 	} else {
 	models.Gymko.findAll({
       order: 'updatedAt DESC',
+			where:{ gym_type: {$lt: 3} },
       limit: 100
 	}).then(function(gymkos){
-		models.Player.findAll({
-				where: { UserId: req.session.user.id },
-				include: [{model: models.Gymko, attributes: ['gym_description','gym_topic','gym_follow','updatedAt']}]
-		}).then(function(players){
-				res.send({ gymkos: gymkos, players: players, errors: []});
-	})}).catch(function(error){next(error);})	}
+		models.Gymko.findAll({
+				order: 'updatedAt DESC',
+				where:{
+					gym_type: {$gt: 2},
+					createdAt: {$gt: Date.now()}
+				 },
+				limit: 100
+		}).then(function(gymkos_calendar){
+			models.Player.findAll({
+					where: { UserId: req.session.user.id },
+					include: [{model: models.Gymko, attributes: ['gym_description','gym_topic','gym_follow','gym_url','updatedAt']}]
+			}).then(function(players){
+					res.send({ gymkos: gymkos, gymkos_calendar: gymkos_calendar, players: players, errors: []});
+	})})}).catch(function(error){next(error);})	}
 };
-
-
 
 // GET /my_gymkos
 exports.index_mygymkos = function(req, res, next){
@@ -93,31 +96,6 @@ exports.answer = function(req,res){
 	res.render('gymkos/answer', {gymko: req.gymko, respuesta: resultado, errors: []});
 };
 
-// GET /gymkos/statictics
-exports.statistics = function(req,res){
-	console.log('Search and count');
-
-	// Se utiliza Promise.all para realizar consultas asíncronas en paralelo
-	var stats = {};
-	sequelize.Promise.all([
-  	 models.Gymko.count(),
-	   models.Note.count(),
-	   models.Gymko.findAll({ include: [{model: models.Note, required: true}] }),
-     models.User.count(),
-     models.User.count({ where: { updatedAt: {$gt: new Date(new Date() - 7 * 24 * 60 * 60 * 1000)} } }),
-     models.Player.count()
-	]).then(function(result){
-		stats.gymko = result[0];
-		stats.note = result[1];
-		stats.withNote = result[2].length;
-    stats.user = result[3];
-    stats.user_active = result[4];
-    stats.player = result[5];
-		res.render('gymkos/statistics',{ statictics: stats, errors: []});
-
-	});
-};
-
 // GET /gymkos/new
 exports.new_gymko = function(req,res){
  	var gymko = models.Gymko.build(
@@ -129,18 +107,51 @@ exports.new_gymko = function(req,res){
 
 // POST /gymkos/create
 exports.create_gymko = function(req,res){
+
  	var gymko = models.Gymko.build(req.body);
-	gymko.UserId = req.session.user.id;
+  console.log(req.body);
+
   gymko.gym_follow = 0;
 	gymko.validate().then(function(err){
 		if (err) {
+			console.log(err);
 			res.render('gymkos/new', {gymko: gymko, errors: err.errors});
 		} else {
 			// guarda en DB los campos pregunta y respuesta
-			gymko.save({fields: ["gym_description","gym_topic","gym_follow","UserId"]}).then(gymkoSave => {
+			gymko.save().then(gymkoSave => {
 			res.send(gymkoSave);})
 		}
 	});
+};
+
+// POST /gymkos/image
+exports.image_gymko = function(req,res){
+
+  var form_gymko = new formidable.IncomingForm({
+    uploadDir: './public/images/gymkos',
+    multiples: true // req.files to be arrays of files
+  });
+
+  var file_path;
+  form_gymko.parse(req, function(err, fields, files) {
+    console.log('parse');
+    //console.log(files.file.path);
+    //gymko.gymko_url = files.kot_photo.path.substr(7);
+    //console.log(gymko.gymko_url);
+    //koto.kot_description = fields.kot_description;
+  });
+
+  form_gymko.on('fileBegin', function(name, file) {
+    console.log('fileBegin');
+    file_path = file.path;
+    console.log(file_path);
+  });
+
+	form_gymko.on('end', function() {
+    console.log('end');
+    res.send(file_path);
+	});
+
 };
 
 // GET /gymkos/:gymkoId/edit
@@ -277,6 +288,7 @@ exports.create_note = function(req, res, next){
 
 // DELETE /gymkos/:gymkoId/notes/:noteId
 exports.destroy_note = function(req, res, next){
+  console.log('Destroy');
   models.Note.find({
       where: {
         id: req.params.noteId
@@ -298,3 +310,28 @@ exports.publish = function(req,res){
 		).catch( function(error){next(error)} );
 };
 */
+
+// GET /gymkos/statictics
+exports.statistics = function(req,res){
+	console.log('Search and count');
+
+	// Se utiliza Promise.all para realizar consultas asíncronas en paralelo
+	var stats = {};
+	sequelize.Promise.all([
+  	 models.Gymko.count(),
+	   models.Note.count(),
+	   models.Gymko.findAll({ include: [{model: models.Note, required: true}] }),
+     models.User.count(),
+     models.User.count({ where: { updatedAt: {$gt: new Date(new Date() - 7 * 24 * 60 * 60 * 1000)} } }),
+     models.Player.count()
+	]).then(function(result){
+		stats.gymko = result[0];
+		stats.note = result[1];
+		stats.withNote = result[2].length;
+    stats.user = result[3];
+    stats.user_active = result[4];
+    stats.player = result[5];
+		res.render('gymkos/statistics',{ statictics: stats, errors: []});
+
+	});
+};
