@@ -4,6 +4,14 @@ var models = require('../models/models.js');
 // Cargamos Sequelize
 var sequelize = require('sequelize');
 
+// Goolge Cloud Storage
+var Storage = require('@google-cloud/storage');
+const CLOUD_BUCKET = "gymkoto-195110.appspot.com";
+const storage = Storage({
+  projectId: "gymkoto-195110"
+});
+const bucket = storage.bucket(CLOUD_BUCKET);
+
 var formidable = require('formidable');
 var fs = require('fs-extra');
 
@@ -128,28 +136,48 @@ exports.create_gymko = function(req,res){
 exports.image_gymko = function(req,res){
 
   var form_gymko = new formidable.IncomingForm({
-    uploadDir: './public/images/gymkos',
+    //uploadDir: './public/images/gymkos',
     multiples: true // req.files to be arrays of files
   });
 
   var file_path;
   form_gymko.parse(req, function(err, fields, files) {
     console.log('parse');
-    //console.log(files.file.path);
-    //gymko.gymko_url = files.kot_photo.path.substr(7);
-    //console.log(gymko.gymko_url);
-    //koto.kot_description = fields.kot_description;
   });
 
   form_gymko.on('fileBegin', function(name, file) {
     console.log('fileBegin');
     file_path = file.path;
     console.log(file_path);
+		console.log(file);
   });
 
+	form_gymko.on('file', function(name, file) {
+		console.log('File end');
+		console.log(file);
+	});
+
 	form_gymko.on('end', function() {
-    console.log('end');
-    res.send(file_path);
+		var file = bucket.file(file_path.substr(5));
+
+		fs.createReadStream(file_path)
+		.pipe(file.createWriteStream({
+			metadata: {
+				contentType: 'image/jpeg'
+			}
+		}))
+		.on('error', function(err) {
+			console.log('error');
+			res.send(err);
+		})
+		.on('finish', function() {
+			console.log('finish');
+			file.makePublic().then(() => {
+					console.log('send end');
+					res.send(file_path.substr(5));
+				});
+		});
+
 	});
 
 };

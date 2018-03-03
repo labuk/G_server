@@ -43,7 +43,7 @@ router.delete('/gymkos/:gymkoId(\\d+)/photo/:photoId(\\d+)', playerController.de
 router.get('/my_rewards', playerController.index_myrewards);
 router.post('/gymkos/reward/:gymkoId(\\d+)/:userId(\\d+)/create', playerController.create_reward);
 router.get('/prizes', playerController.index_prizes);
-router.post('/gymkos/prize/create', playerController.create_prize);
+router.post('/gymkos/prize/:gymkoId(\\d+)/:userId(\\d+)/create', playerController.create_prize);
 //router.get('/gymkos/:gymkoId(\\d+)/:playerId(\\d+)/:photoId(\\d+)/comments/new', playerController.new_comment);
 //router.post('/gymkos/:gymkoId(\\d+)/:playerId(\\d+)/:photoId(\\d+)/comments', playerController.create_comment);
 //router.get('/gymkos/:gymkoId(\\d+)/:playerId(\\d+)/:photoId(\\d+)/comments/:commentId(\\d+)/publish', sessionController.loginRequired, playerController.publish_comment);

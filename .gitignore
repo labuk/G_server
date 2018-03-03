@@ -30,6 +30,7 @@ node_modules
 jspm_packages
 
 # Image directories
+upload*
 public/images/gymkos
 public/images/kotos
 public/images/photos

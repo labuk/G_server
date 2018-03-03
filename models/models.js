@@ -78,11 +78,11 @@ var Player = sequelize.import(player_path);
 	Gymko.hasMany(Player, {onDelete: 'cascade', hooks:true});
 	Player.belongsTo(User);
 
-	// Importar la definición de la tabla Prize en prize.js
-	var prize_path = path.join(__dirname, 'player/prize');
-	var Prize = sequelize.import(prize_path);
-		Prize.belongsTo(User);
-			User.hasMany(Prize, {onDelete: 'cascade', hooks:true});
+// Importar la definición de la tabla Prize en prize.js
+var prize_path = path.join(__dirname, 'player/prize');
+var Prize = sequelize.import(prize_path);
+	Prize.belongsTo(User);
+		User.hasMany(Prize, {onDelete: 'cascade', hooks:true});
 
 // Importar la definición de la tabla Reward en reward.js
 var reward_path = path.join(__dirname, 'player/reward');

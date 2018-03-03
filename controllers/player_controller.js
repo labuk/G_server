@@ -1,6 +1,14 @@
 // Importamos modelo DB
 var models = require('../models/models.js');
 
+// Goolge Cloud Storage
+var Storage = require('@google-cloud/storage');
+const CLOUD_BUCKET = "gymkoto-195110.appspot.com";
+const storage = Storage({
+  projectId: "gymkoto-195110"
+});
+const bucket = storage.bucket(CLOUD_BUCKET);
+
 var formidable = require('formidable');
 var fs = require('fs-extra');
 
@@ -30,7 +38,7 @@ exports.show_gymko = function(req, res){
 			models.Player.find({
 				where: {
 					GymkoId: req.gymko.id,
-					UserId: req.session.user.id
+					UserId: req.params.userId
 				}
 			}).then(function(player){
 				if (player) {
@@ -43,7 +51,7 @@ exports.show_gymko = function(req, res){
 				} else {
 						res.send({ gymko: req.gymko, photos: photos, player: player, notes: notes, errors: [] });
 				}
-	})})});
+	});});});
 };
 
 // POST /gymkos/:gymkoid/:userId/create
@@ -75,7 +83,7 @@ exports.destroy_player = function(req, res, next){
   models.Player.find({
       where: {
         gymkoId: req.params.gymkoId,
-        userId: req.session.user.id }
+        userId: req.params.userId }
   }).then(function(player){
    	player.destroy().then( function() {
       models.Gymko.find({
@@ -86,14 +94,14 @@ exports.destroy_player = function(req, res, next){
           res.send({alert: 'Ok'});
         });
       });
-  	}).catch(function(error){next(error)});
+  	}).catch(function(error){next(error);});
   });
 };
 
 // POST /gymkos/:gymkoId/photo/:kotoId/create/:userId
 exports.create_photo = function(req,res){
   var form_photo = new formidable.IncomingForm({
-    uploadDir: './public/images/photos',
+    //uploadDir: './public/images/photos',
     multiples: true // req.files to be arrays of files
   });
 
@@ -107,7 +115,7 @@ exports.create_photo = function(req,res){
 		console.log('fileBegin');
 		console.log(file.path);
 		if(file.path) {
-			photo.pho_url = file.path.substr(7);
+			photo.pho_url = file.path.substr(5);
 			file_path = file.path;
 			photo.GymkoId = req.params.gymkoId;
 			photo.KotoId = req.params.kotoId;
@@ -119,67 +127,90 @@ exports.create_photo = function(req,res){
 		console.log(file_path);
 	});
 
-  form_photo.on('end', function(fields, files) {
-    if (photo) {
-			models.Player.find({
-		      where: {
-		        gymkoId: req.params.gymkoId,
-		        userId: req.session.user.id }
-		  }).then(function(player){
-				if(player) {
-					photo.PlayerId = player.id;
-					photo.validate().then(function(err){
-						if (err) {
-							res.send({errors: err.errors});
-						} else {
-							// guarda en DB los campos pregunta y respuesta
-							photo.save().then(function(new_photo){
-								models.Player.update({
-									pla_goal: 1
-								}, {
-									where: { id: player.id }
-								}).then(function(){
-									res.send(file_path);
-								})
-						})}
-					});
-				} else {
-					var player = models.Player.build(
-						{ GymkoId: req.params.gymkoId,
-							UserId: req.params.userId,
-							pla_goal: 1
-						});
-					player.validate().then(function(err){
-						if (err) {
-							res.render('gymkos/new', {gymko: gymko, errors: err.errors});
-						} else {
-							// guarda en DB los campos pregunta y respuesta
-							player.save({fields: ["pla_goal","GymkoId","UserId"]}).then(playerSave => {
-								photo.PlayerId = playerSave.id;
-								models.Gymko.find({
-										where: { id:req.params.gymkoId }
-								}).then(function(gymko){
-									gymko.gym_follow = gymko.gym_follow + 1;
-									gymko.save({fields: ["gym_follow"]}).then(function() {
-										photo.validate().then(function(err){
-											if (err) {
-												res.send({errors: err.errors});
-											} else {
-												// guarda en DB los campos pregunta y respuesta
-												photo.save().then(function(new_photo){
-													res.send(file_path);
-											})}
-										});
-									});
-								});
-						});}
-					});
-				}
+  form_photo.on('end', function() {
 
+		console.log('End');
+
+		var file = bucket.file(file_path.substr(5));
+
+    if (photo) {
+
+			fs.createReadStream(file_path)
+			.pipe(file.createWriteStream({
+				metadata: {
+					contentType: 'image/jpeg'
+				}
+			}))
+			.on('error', function(err) {
+				console.log('error');
+				res.send(err);
+			})
+			.on('finish', function() {
+				console.log('finish');
+				file.makePublic().then(() => {
+						console.log('send end');
+						models.Player.find({
+					      where: {
+					        gymkoId: req.params.gymkoId,
+					        userId: req.params.userId }
+					  }).then(function(player){
+							if(player) {
+								photo.PlayerId = player.id;
+								photo.validate().then(function(err){
+									if (err) {
+										res.send({errors: err.errors});
+									} else {
+										// guarda en DB los campos pregunta y respuesta
+										photo.save().then(function(new_photo){
+											models.Player.update({
+												pla_goal: 1
+											}, {
+												where: { id: player.id }
+											}).then(function(){
+												res.send(file_path.substr(5));
+											})
+									})}
+								});
+							} else {
+								var player = models.Player.build(
+									{ GymkoId: req.params.gymkoId,
+										UserId: req.params.userId,
+										pla_goal: 1
+									});
+								player.validate().then(function(err){
+									if (err) {
+										res.render('gymkos/new', {gymko: gymko, errors: err.errors});
+									} else {
+										// guarda en DB los campos pregunta y respuesta
+										player.save({fields: ["pla_goal","GymkoId","UserId"]}).then(playerSave => {
+											photo.PlayerId = playerSave.id;
+											models.Gymko.find({
+													where: { id:req.params.gymkoId }
+											}).then(function(gymko){
+												gymko.gym_follow = gymko.gym_follow + 1;
+												gymko.save({fields: ["gym_follow"]}).then(function() {
+													photo.validate().then(function(err){
+														if (err) {
+															res.send({errors: err.errors});
+														} else {
+															// guarda en DB los campos pregunta y respuesta
+															photo.save().then(function(new_photo){
+																res.send(file_path.substr(5));
+														})}
+													});
+												});
+											});
+									});}
+								});
+							}
+						});
+					});
 			});
     } else {
-      res.send(file_paths);
+	  console.log('No se ha subido el archivo');
+      res.send(file_path);
     }
+
   });
 
 };
@@ -194,7 +225,7 @@ exports.destroy_photo = function(req, res, next){
   }).then(function(photo){
     photo.destroy().then( function() {
       res.send({alert: 'Ok'});
-    }).catch(function(error){next(error)});
+    }).catch(function(error){next(error);});
   });
 };
 
@@ -210,7 +241,7 @@ exports.index_myrewards = function(req, res, next){
 	}).catch(function(error){
 		console.log(error);
 		next(error);
-	})
+	});
 };
 
 // GET /prizes
@@ -228,84 +259,120 @@ exports.index_prizes = function(req, res, next){
 	}).catch(function(error){
 		console.log(error);
 		next(error);
-	})
+	});
 };
 
 // POST /gymkos/reward/:gymkoid/:userId/create
-exports.create_reward = function(req,res){
+exports.create_reward = function(req,res) {
 	console.log('Reward');
 	models.User.find({
 			where: { id: req.params.userId }
 	}).then(function(user){
-		user.usr_points = parseInt(user.usr_points) + parseInt(req.body.rew_points);
-		if(user.usr_points < 0){
-			res.send({points: 1});
-		} else {
-			models.Reward.find({
-				where: {
-					gymkoId: req.params.gymkoId,
-					userId: req.params.userId }
-			}).then(function(reward){
-				if(reward) {
-					console.log('Reward concedida');
-					res.send({points: 0});
-				} else {
-					var points = req.body.rew_points;
-					models.Gymko.find({
-						where: {
-							id: req.params.gymkoId
-						}
-					}).then(function(gymko){
-						var reward = models.Reward.build(
-							{ rew_points: points,
-								GymkoId: req.params.gymkoId,
-								UserId: req.params.userId
-							});
-						reward.validate().then(function(err){
-							if (err) {
-								console.log(err);
-								res.render('gymkos/new', {gymko: gymko, errors: err.errors});
-							} else {
-								// guarda en DB los campos pregunta y respuesta
-								reward.save().then(function(){
-									//console.log('User');
-									//models.User.find({
-									//		where: { id: req.params.userId }
-									//}).then(function(user){
-										user.usr_points = parseInt(user.usr_points) + parseInt(points);
-										user.save({fields: ["usr_points"]}).then(function(){
-											res.send({points: points});
-										});
-									//});
-							});}
-						});
-					});
-				}
-			});
-		}
+    models.Gymko.find({
+        where: { id:req.params.gymkoId }
+    }).then(function(gymko){
+  		user.usr_points = parseInt(user.usr_points) + parseInt(gymko.gym_point);
+  		if(user.usr_points < 0){
+  			res.send({points: 1});
+  		} else {
+  			models.Reward.find({
+  				where: {
+  					gymkoId: req.params.gymkoId,
+  					userId: req.params.userId }
+  			}).then(function(reward){
+  				if(reward) {
+  					console.log('Reward concedida');
+  					res.send({points: 0});
+  				} else {
+  					var points = gymko.gym_point;
+  					models.Gymko.find({
+  						where: {
+  							id: req.params.gymkoId
+  						}
+  					}).then(function(gymko){
+  						var reward = models.Reward.build(
+  							{ rew_points: points,
+  								GymkoId: req.params.gymkoId,
+  								UserId: req.params.userId
+  							});
+  						reward.validate().then(function(err){
+  							if (err) {
+  								console.log(err);
+  								res.render('gymkos/new', {gymko: gymko, errors: err.errors});
+  							} else {
+  								// guarda en DB los campos pregunta y respuesta
+  								reward.save().then(function(){
+  									//console.log('User');
+  									//models.User.find({
+  									//		where: { id: req.params.userId }
+  									//}).then(function(user){
+  										user.usr_points = parseInt(user.usr_points) + parseInt(points);
+  										user.save({fields: ["usr_points"]}).then(function(){
+  											res.send({points: points});
+  										});
+  									//});
+  							});}
+  						});
+  					});
+  				}
+  			});
+  		}
+    });
 	});
 };
 
-// POST /gymkos/prize/create
+// POST /gymkos/prize/:gymkoid/:userId/create
 exports.create_prize = function(req,res){
-
-	console.log(req.body);
-	req.body.pri_points = 10;
-	req.body.GymkoId = 1;
-	req.body.UserId = req.session.user.id;
- 	var prize = models.Prize.build(req.body);
-
-  prize.pri_follow = 0;
-	prize.validate().then(function(err){
-		if (err) {
-			res.render('gymkos/new', {gymko: gymko, errors: err.errors});
-		} else {
-			// guarda en DB los campos pregunta y respuesta
-			prize.save().then(prizeSave => {
-			res.send(prizeSave);})
-		}
-	});
-};
+  	console.log('Prize');
+  	models.User.find({
+  			where: { id: req.body.userId }
+  	}).then(function(user){
+      console.log(req.body);
+      console.log(user);
+  		user.usr_points = parseInt(user.usr_points) + parseInt(req.body.rew_points);
+  		if(user.usr_points < 0){
+  			res.send({points: 1});
+  		} else {
+  			models.Reward.find({
+  				where: {
+  					gymkoId: req.params.gymkoId,
+  					userId: req.body.userId }
+  			}).then(function(reward){
+  				if(reward) {
+  					console.log('Reward concedida');
+  					res.send({points: 0});
+  				} else {
+  					var points = req.body.rew_points;
+  					models.Gymko.find({
+  						where: {
+  							id: req.params.gymkoId
+  						}
+  					}).then(function(gymko){
+  						var reward = models.Reward.build(
+  							{ rew_points: points,
+  								GymkoId: req.params.gymkoId,
+  								UserId: req.body.userId
+  							});
+  						reward.validate().then(function(err){
+  							if (err) {
+  								console.log(err);
+  								res.render('gymkos/new', {gymko: gymko, errors: err.errors});
+  							} else {
+  								// guarda en DB los campos pregunta y respuesta
+  								reward.save().then(function(){
+  										user.usr_points = parseInt(user.usr_points) + parseInt(points);
+  										user.save({fields: ["usr_points"]}).then(function(){
+  											res.send({points: points});
+  										});
+  									//});
+  							});}
+  						});
+  					});
+  				}
+  			});
+  		}
+  	});
+  };
 
 // GET /gymkos/:gymkoId/comments/new
 exports.new = function(req,res){
@@ -326,9 +393,9 @@ exports.create = function(req, res, next){
 		} else {
 			// guarda en DB los campos pregunta y respuesta
 			comment.save().then(function(){
-			res.redirect('/gymkos/'+req.params.gymkoId);})
+			res.redirect('/gymkos/'+req.params.gymkoId);});
 		}
-	}).catch(function(error){next(error)});
+	}).catch(function(error){next(error);});
 };
 
 // GET /gymkos/:gymkoId/comments/:commentId/publish
@@ -337,5 +404,5 @@ exports.publish = function(req, res, next){
 
 	req.comment.save({ fields: ["publicado"]}).then(
 		function(){res.redirect('/gymkos/'+req.params.gymkoId);}
-		).catch( function(error){next(error)} );
+		).catch( function(error){next(error);} );
 };
